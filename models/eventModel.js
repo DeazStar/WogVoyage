@@ -29,23 +29,26 @@ const eventSchema = new mongoose.Schema({
     required: [true, 'Event must have a summary'],
   },
   price: {
-    type: Number || String,
+    type: mongoose.Schema.Types.Mixed,
     required: [
       true,
-      'Price is required if the price is free just put Free on the price field',
+      'Price is required if the price is free just put free on the price field',
     ],
     validate: {
       validator: function (data) {
         if (typeof data === 'string') {
-          return data === 'Free';
+          return data === 'free';
         }
-        return true;
+        if (typeof data === 'number') {
+          return true;
+        }
+        return false;
       },
-      message: 'if the price is free just put "Free"',
+      message: 'if the price is free just put "free"',
     },
   },
   organizer: {
-    type: mongoose.ObjectId,
+    type: mongoose.Schema.Types.ObjectId,
     required: [true, 'Event need an organizer'],
   },
   description: {
