@@ -1,7 +1,7 @@
 const Event = require('../models/eventModel');
+const catchAsync = require('../errors/catchAsync');
 
-const createEvent = async (req, res, next) => {
-  console.log('send***********', req.body);
+const createEvent = catchAsync(async (req, res, next) => {
   const event = await Event.create(req.body);
 
   res.status(201).json({
@@ -10,7 +10,7 @@ const createEvent = async (req, res, next) => {
       event,
     },
   });
-};
+});
 
 module.exports = {
   createEvent,
