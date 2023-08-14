@@ -33,6 +33,13 @@ const handleValidationError = (error) => {
   return new AppError(message, statusCode);
 };
 
+const handleCastError = (error) => {
+  const statusCode = 400;
+  const message = `Invalid Id ${error.value}`;
+
+  return new AppError(message, statusCode);
+};
+
 module.exports = async (err, req, res, next) => {
   err.statusCode = err.statusCode || 500;
   err.status = err.status || 'error';
@@ -47,6 +54,8 @@ module.exports = async (err, req, res, next) => {
     );
 
     if (error.name === 'ValidationError') error = handleValidationError(error);
+
+    if (error.name === 'CastError') error = handleCastError(error);
 
     sendProdError(error, res);
   }
