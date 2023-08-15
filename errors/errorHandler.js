@@ -1,13 +1,15 @@
-const AppError = require('./AppError');
+/* eslint-disable import/extensions */
+/* eslint-disable import/no-import-module-exports */
+import AppError from './AppError.js';
 
-const sendDevError = (err, res) => {
+function sendDevError(err, res) {
   res.status(err.statusCode).json({
     status: err.status,
     message: err.message,
     stack: err.stack,
     error: err,
   });
-};
+}
 
 const sendProdError = (err, res) => {
   if (err.isOperational) {
@@ -40,7 +42,7 @@ const handleCastError = (error) => {
   return new AppError(message, statusCode);
 };
 
-module.exports = async (err, req, res, next) => {
+export default async (err, req, res, next) => {
   err.statusCode = err.statusCode || 500;
   err.status = err.status || 'error';
 

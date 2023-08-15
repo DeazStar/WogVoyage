@@ -1,7 +1,8 @@
-const express = require('express');
-const morgan = require('morgan');
-const eventRouter = require('./routes/eventRouter');
-const globalErrorHandler = require('./errors/errorHandler');
+/* eslint-disable import/extensions */
+import express from 'express';
+import morgan from 'morgan';
+import eventRouter from './routes/eventRouter.js';
+import globalErrorHandler from './errors/errorHandler.js';
 
 const app = express();
 
@@ -12,4 +13,4 @@ app.use('/api/v1/events', eventRouter);
 
 app.use(globalErrorHandler);
 
-module.exports = app;
+export default app;

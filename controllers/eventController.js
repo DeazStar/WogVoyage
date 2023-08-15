@@ -1,5 +1,6 @@
-const Event = require('../models/eventModel');
-const catchAsync = require('../errors/catchAsync');
+/* eslint-disable import/extensions */
+import Event from '../models/eventModel.js';
+import catchAsync from '../errors/catchAsync.js';
 
 const createEvent = catchAsync(async (req, res, next) => {
   const event = await Event.create(req.body);
@@ -32,8 +33,18 @@ const getAllEvents = catchAsync(async (req, res, next) => {
   });
 });
 
-module.exports = {
-  createEvent,
-  deleteEvent,
-  getAllEvents,
-};
+const updateEvent = catchAsync(async (req, res, next) => {
+  const updatedEvent = await Event.findByIdAndUpdate(req.params.id, req.body, {
+    new: true,
+    runValidation: true,
+  });
+
+  res.status(200).json({
+    status: 'success',
+    data: {
+      event: updatedEvent,
+    },
+  });
+});
+
+export default { createEvent, deleteEvent, getAllEvents, updateEvent };

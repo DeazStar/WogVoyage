@@ -1,5 +1,7 @@
-const express = require('express');
-const eventController = require('../controllers/eventController');
+/* eslint-disable import/extensions */
+/* eslint-disable import/no-import-module-exports */
+import express from 'express';
+import eventController from '../controllers/eventController.js';
 
 const router = express.Router();
 
@@ -8,6 +10,9 @@ router
   .get(eventController.getAllEvents)
   .post(eventController.createEvent);
 
-router.route('/:id').delete(eventController.deleteEvent);
+router
+  .route('/:id')
+  .patch(eventController.updateEvent)
+  .delete(eventController.deleteEvent);
 
-module.exports = router;
+export default router;

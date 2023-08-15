@@ -1,6 +1,7 @@
+/* eslint-disable import/no-import-module-exports */
 /* eslint-disable import/no-extraneous-dependencies */
-const mongoose = require('mongoose');
-const validator = require('validator');
+import mongoose from 'mongoose';
+import validator from 'validator';
 
 const userSchema = mongoose.Schema({
   firstName: {
@@ -55,4 +56,4 @@ const userSchema = mongoose.Schema({
 
 const User = mongoose.model('User', userSchema);
 
-module.exports = User;
+export default User;

@@ -1,16 +1,19 @@
-const dotenv = require('dotenv');
+/* eslint-disable import/extensions */
+import dotenv from 'dotenv';
+import mongoose from 'mongoose';
+import app from './app.js';
 
-dotenv.config({path: 'config.env'});
+dotenv.config({ path: 'config.env' });
 
-const mongoose = require('mongoose');
-const app = require('./app');
-
-mongoose.connect(process.env.DATABASE_URL).then((data) => {
-  console.log('Database connected')
-}).catch((err) => {
-  console.log('Database Error');
-  process.exit();
-});
+mongoose
+  .connect(process.env.DATABASE_URL)
+  .then(() => {
+    console.log('Database connected');
+  })
+  .catch((err) => {
+    console.log('Database Error');
+    process.exit();
+  });
 
 const port = process.env.PORT || 5000;
 
@@ -18,4 +21,4 @@ const server = app.listen(port, () => {
   console.log(`Server listening on port ${port} ...`);
 });
 
-module.exports = server;
+export default server;

@@ -1,4 +1,6 @@
-const mongoose = require('mongoose');
+/* eslint-disable import/prefer-default-export */
+/* eslint-disable import/no-import-module-exports */
+import mongoose from 'mongoose';
 
 const eventSchema = new mongoose.Schema({
   eventName: {
@@ -47,10 +49,10 @@ const eventSchema = new mongoose.Schema({
       message: 'if the price is free just put "free"',
     },
   },
-  organizer: {
+  /*organizer: {
     type: mongoose.Schema.Types.ObjectId,
     required: [true, 'Event need an organizer'],
-  },
+  },*/
   description: {
     type: String,
     required: [true, 'Event must have a description'],
@@ -59,4 +61,4 @@ const eventSchema = new mongoose.Schema({
 
 const Event = mongoose.model('Event', eventSchema);
 
-module.exports = Event;
+export default Event;
