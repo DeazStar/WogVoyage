@@ -42,6 +42,13 @@ const handleCastError = (error) => {
   return new AppError(message, statusCode);
 };
 
+const handleDuplicateKeyError = (error) => {
+  const statusCode = 409;
+  const message = `${Object.values(error.keyValue)} already exist`;
+
+  return new AppError(message, statusCode);
+};
+
 export default async (err, req, res, next) => {
   err.statusCode = err.statusCode || 500;
   err.status = err.status || 'error';
@@ -58,6 +65,8 @@ export default async (err, req, res, next) => {
     if (error.name === 'ValidationError') error = handleValidationError(error);
 
     if (error.name === 'CastError') error = handleCastError(error);
+
+    if (error.code === 11000) error = handleDuplicateKeyError(error);
 
     sendProdError(error, res);
   }
