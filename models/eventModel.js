@@ -49,10 +49,10 @@ const eventSchema = new mongoose.Schema({
       message: 'if the price is free just put "free"',
     },
   },
-  /*organizer: {
+  organizer: {
     type: mongoose.Schema.Types.ObjectId,
     required: [true, 'Event need an organizer'],
-  },*/
+  },
   description: {
     type: String,
     required: [true, 'Event must have a description'],
