@@ -2,15 +2,17 @@
 /* eslint-disable import/extensions */
 import jwt from 'jsonwebtoken';
 import User from '../models/userModel.js';
+import AppError from '../errors/AppError.js';
 import catchAsync from '../errors/catchAsync.js';
+import sendEmail from '../lib/sendEmail.js';
 
 const signToken = (userId) =>
   jwt.sign({ userId }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRES_IN,
   });
+
 const createSendToken = (user, statusCode, res) => {
   const token = signToken(user._id);
-  console.log(token);
 
   const cookieOption = {
     expires: new Date(
@@ -51,11 +53,52 @@ const signup = catchAsync(async (req, res, next) => {
     phoneNumber: req.body.phoneNumber,
   });
 
-  createSendToken(user, 201, res);
+  const token = user.generateEmailVerificationToken();
+
+  const message = `Verify your email address</h1> <p>to continue using WogVoyage 
+  please verify that this is your email 
+  address ${req.protocol}://${req.hostname}:${process.env.PORT}${req.baseUrl}/verifyEmail/${token}`;
+
+  const mailOptions = {
+    from: '<naodararsa@gmail.com>',
+    to: user.email,
+    subject: 'WogVoyage - Verify your email',
+    text: message,
+  };
+
+  user.save({ validateBeforeSave: false });
+
+  await sendEmail(mailOptions);
+
+  res.status(201).json({
+    status: 'success',
+    data: {
+      user: {
+        firstName: user.firstName,
+        lastName: user.lastName,
+        email: user.email,
+        emailStatus: user.emailStatus,
+        role: user.role,
+        country: user.country,
+        city: user.city,
+        phoneNumber: user.phoneNumber,
+      },
+    },
+  });
 });
 
 const login = catchAsync(async (req, res, next) => {
-  res.status(200).json();
+  const { email, password } = req.body;
+
+  if (!email || !password)
+    return next(new AppError('email and password are required', 400));
+
+  const user = await User.findOne({ email });
+
+  if (!user || !(await user.checkPassword(password, user.password)))
+    return next(new AppError('incorrect email or password', 401));
+
+  createSendToken(user, 200, res);
 });
 
 export default { signup, login };
