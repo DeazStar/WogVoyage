@@ -1,5 +1,6 @@
 /* eslint-disable import/no-extraneous-dependencies */
 /* eslint-disable import/extensions */
+import crypto from 'crypto';
 import jwt from 'jsonwebtoken';
 import User from '../models/userModel.js';
 import AppError from '../errors/AppError.js';
@@ -101,4 +102,33 @@ const login = catchAsync(async (req, res, next) => {
   createSendToken(user, 200, res);
 });
 
-export default { signup, login };
+const verifyEmail = catchAsync(async (req, res, next) => {
+  const { token } = req.params;
+
+  if (!token) return new AppError('Token not sent, Invalid request', 400);
+
+  const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+
+  const user = await User.findOne({ emailVerificationToken: hashedToken });
+
+  if (!user)
+    return next(new AppError('There is not user with this token', 404));
+
+  if (!user.checkEmailTokenExpires())
+    return next(
+      new AppError('Token Expired. Please request another token', 401),
+    );
+
+  user.emailStatus = 'verified';
+  user.emailVerificationToken = undefined;
+  user.emailVerificationTokenExpiresIn = undefined;
+
+  user.save({ validateBeforeSave: false });
+
+  res.status(200).json({
+    status: 'success',
+    message: 'email verified',
+  });
+});
+
+export default { signup, login, verifyEmail };
