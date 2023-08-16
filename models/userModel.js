@@ -24,15 +24,14 @@ const userSchema = mongoose.Schema({
   },
   emailStatus: {
     type: String,
+    enum: ['unverified', 'verified'],
     default: 'unverified',
   },
   emailVerificationToken: {
     type: String,
-    select: false,
   },
   emailVerificationTokenExpiresIn: {
     type: Date,
-    select: false,
   },
   password: {
     type: String,
@@ -100,6 +99,11 @@ userSchema.methods.generateEmailVerificationToken = function () {
   this.emailVerificationTokenExpiresIn = Date.now() + 10 * 60 * 1000;
 
   return token;
+};
+
+userSchema.methods.checkEmailTokenExpires = function () {
+  console.log(this.emailVerificationTokenExpiresIn, new Date(Date.now()));
+  return this.emailVerificationTokenExpiresIn > new Date(Date.now());
 };
 
 const User = mongoose.model('User', userSchema);
