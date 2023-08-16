@@ -1,6 +1,8 @@
 /* eslint-disable import/no-import-module-exports */
 /* eslint-disable import/no-extraneous-dependencies */
+import crypto from 'crypto';
 import mongoose from 'mongoose';
+import bcrypt from 'bcrypt';
 import validator from 'validator';
 
 const userSchema = mongoose.Schema({
@@ -19,6 +21,18 @@ const userSchema = mongoose.Schema({
     required: [true, 'User must have an email'],
     unique: true,
     validate: [validator.isEmail, 'Please provide a valid email'],
+  },
+  emailStatus: {
+    type: String,
+    default: 'unverified',
+  },
+  emailVerificationToken: {
+    type: String,
+    select: false,
+  },
+  emailVerificationTokenExpiresIn: {
+    type: Date,
+    select: false,
   },
   password: {
     type: String,
@@ -55,6 +69,38 @@ const userSchema = mongoose.Schema({
   },
 });
 
-const User = mongoose.model('User', userSchema);
+const createToken = function () {
+  const token = crypto.randomBytes(32).toString('hex');
 
+  return token;
+};
+
+userSchema.pre('save', async function (next) {
+  this.password = await bcrypt.hash(this.password, 12);
+  this.passwordConfirm = undefined;
+
+  next();
+});
+
+userSchema.methods.checkPassword = async function (
+  inputPassword,
+  userPassword,
+) {
+  return await bcrypt.compare(inputPassword, userPassword);
+};
+
+userSchema.methods.generateEmailVerificationToken = function () {
+  const token = createToken();
+
+  this.emailVerificationToken = crypto
+    .createHash('sha256')
+    .update(token)
+    .digest('hex');
+
+  this.emailVerificationTokenExpiresIn = Date.now() + 10 * 60 * 1000;
+
+  return token;
+};
+
+const User = mongoose.model('User', userSchema);
 export default User;
