@@ -8,4 +8,5 @@ router.route('/signup').post(authController.signup);
 
 router.route('/login').post(authController.login);
 
+router.route('/verifyEmail/:token').patch(authController.verifyEmail);
 export default router;
