@@ -101,9 +101,5 @@ userSchema.methods.checkEmailTokenExpires = function () {
   return this.emailVerificationTokenExpiresIn > new Date(Date.now());
 };
 
-userSchema.methods.jwtTokenExpires = function (expiredTimeStamp) {
-  return expiredTimeStamp < Date.now();
-};
-
 const User = mongoose.model('User', userSchema);
 export default User;
