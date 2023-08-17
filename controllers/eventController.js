@@ -1,4 +1,5 @@
 /* eslint-disable import/extensions */
+import Features from '../lib/Features.js';
 import Event from '../models/eventModel.js';
 import catchAsync from '../errors/catchAsync.js';
 
@@ -23,12 +24,30 @@ const deleteEvent = catchAsync(async (req, res, next) => {
 });
 
 const getAllEvents = catchAsync(async (req, res, next) => {
-  const events = await Event.find();
+  const queryObject = new Features(Event.find(), req.query)
+    .filter()
+    .sort()
+    .limitFields()
+    .paginate();
+
+  const events = await queryObject.query;
 
   res.status(200).json({
     status: 'success',
     data: {
       events,
+    },
+  });
+});
+
+const getEventById = catchAsync(async (req, res, next) => {
+  console.log(req.params);
+  const event = await Event.findById(req.params.id);
+
+  res.status(200).json({
+    status: 'success',
+    data: {
+      event,
     },
   });
 });
@@ -47,4 +66,10 @@ const updateEvent = catchAsync(async (req, res, next) => {
   });
 });
 
-export default { createEvent, deleteEvent, getAllEvents, updateEvent };
+export default {
+  createEvent,
+  deleteEvent,
+  getAllEvents,
+  updateEvent,
+  getEventById,
+};
