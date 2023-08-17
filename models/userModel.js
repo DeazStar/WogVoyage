@@ -66,6 +66,8 @@ const userSchema = mongoose.Schema({
     type: String,
     required: [true, 'Please provide your phone number'],
   },
+  passwordRecoveryToken: String,
+  passwordRecoveryTokenExpiresIn: Date,
 });
 
 const createToken = function () {
@@ -96,9 +98,25 @@ userSchema.methods.generateEmailVerificationToken = function () {
   return token;
 };
 
+userSchema.methods.generatePasswordRecoveryToken = function () {
+  const token = createToken();
+
+  this.passwordRecoveryToken = crypto
+    .createHash('sha256')
+    .update(token)
+    .digest('hex');
+
+  this.passwordRecoveryTokenExpiresIn = Date.now() + 10 * 60 * 1000;
+
+  return token;
+};
+
 userSchema.methods.checkEmailTokenExpires = function () {
-  console.log(this.emailVerificationTokenExpiresIn, new Date(Date.now()));
   return this.emailVerificationTokenExpiresIn > new Date(Date.now());
+};
+
+userSchema.methods.checkPasswordRecoveryTokenExpires = function () {
+  return this.passwordRecoveryTokenExpiresIn > new Date(Date.now());
 };
 
 const User = mongoose.model('User', userSchema);
