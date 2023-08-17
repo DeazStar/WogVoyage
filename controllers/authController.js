@@ -64,7 +64,7 @@ const signup = catchAsync(async (req, res, next) => {
   address ${req.protocol}://${req.hostname}:${process.env.PORT}${req.baseUrl}/verifyEmail/${token}`;
 
   const mailOptions = {
-    from: '<naodararsa@gmail.com>',
+    from: '<wogvoyage@gmail.com>',
     to: user.email,
     subject: 'WogVoyage - Verify your email',
     text: message,
@@ -153,4 +153,77 @@ const protectRoute = catchAsync(async (req, res, next) => {
   next();
 });
 
-export default { signup, login, verifyEmail, protectRoute };
+const forgetPassword = catchAsync(async (req, res, next) => {
+  const { email } = req.body;
+
+  if (!email) return next(new AppError('Email is required', 401));
+
+  const user = await User.findOne({ email: email });
+
+  if (!user) return next(new AppError('There is no user with this email', 404));
+
+  const token = user.generatePasswordRecoveryToken();
+
+  const message = `Verify your email address</h1> <p>to continue using WogVoyage 
+  please verify that this is your email 
+  address ${req.protocol}://${req.hostname}:${process.env.PORT}${req.baseUrl}/recoverPassword/${token}`;
+
+  const mailOptions = {
+    from: '<wogvoyage@gmail.com>',
+    to: user.email,
+    subject: 'WogVoyage - Password recovery',
+    text: message,
+  };
+
+  user.save({ validateBeforeSave: false });
+
+  sendEmail(mailOptions);
+
+  res.status(200).json({
+    status: 'success',
+    message: 'email sent successfully',
+  });
+});
+
+const recoverPassword = catchAsync(async (req, res, next) => {
+  const { token } = req.params;
+
+  if (!token)
+    return next(
+      new AppError('to recover the password you need a recovery token', 401),
+    );
+
+  const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+
+  const user = await User.findOne({ passwordRecoveryToken: hashedToken });
+
+  console.log(user);
+
+  if (!user || !user.checkPasswordRecoveryTokenExpires())
+    return next(new AppError('Invalid Token or Token has expired', 404));
+
+  const { password, passwordConfirm } = req.body;
+
+  user.password = password;
+  user.passwordConfirm = passwordConfirm;
+  user.passwordRecoveryToken = undefined;
+  user.passwordRecoveryTokenExpiresIn = undefined;
+
+  if (user.password !== user.passwordConfirm)
+    return new AppError('password should be the same', 401);
+
+  await user.hashPassword();
+
+  user.save({ validateBeforeSave: false });
+
+  createSendToken(user, 200, res);
+});
+
+export default {
+  signup,
+  login,
+  verifyEmail,
+  protectRoute,
+  forgetPassword,
+  recoverPassword,
+};
