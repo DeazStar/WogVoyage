@@ -1,5 +1,6 @@
 /* eslint-disable import/no-extraneous-dependencies */
 /* eslint-disable import/extensions */
+import { promisify } from 'util';
 import crypto from 'crypto';
 import jwt from 'jsonwebtoken';
 import User from '../models/userModel.js';
@@ -54,6 +55,8 @@ const signup = catchAsync(async (req, res, next) => {
     phoneNumber: req.body.phoneNumber,
   });
 
+  await user.hashPassword();
+
   const token = user.generateEmailVerificationToken();
 
   const message = `Verify your email address</h1> <p>to continue using WogVoyage 
@@ -66,7 +69,6 @@ const signup = catchAsync(async (req, res, next) => {
     subject: 'WogVoyage - Verify your email',
     text: message,
   };
-
   user.save({ validateBeforeSave: false });
 
   await sendEmail(mailOptions);
@@ -96,7 +98,7 @@ const login = catchAsync(async (req, res, next) => {
 
   const user = await User.findOne({ email });
 
-  if (!user || !(await user.checkPassword(password, user.password)))
+  if (!user || !(await user.checkPassword(password)))
     return next(new AppError('incorrect email or password', 401));
 
   createSendToken(user, 200, res);
@@ -131,4 +133,24 @@ const verifyEmail = catchAsync(async (req, res, next) => {
   });
 });
 
-export default { signup, login, verifyEmail };
+const protectRoute = catchAsync(async (req, res, next) => {
+  if (
+    !req.headers.authorization ||
+    !req.headers.authorization.startsWith('Bearer')
+  )
+    return next(
+      new AppError('You must be logged in to access this resource', 401),
+    );
+
+  const token = req.headers.authorization.split(' ')[1];
+
+  const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
+
+  const user = await User.findOne({ _id: decoded.userId });
+
+  req.user = user;
+
+  next();
+});
+
+export default { signup, login, verifyEmail, protectRoute };
