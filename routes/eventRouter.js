@@ -2,16 +2,18 @@
 /* eslint-disable import/no-import-module-exports */
 import express from 'express';
 import eventController from '../controllers/eventController.js';
+import userController from '../controllers/authController.js';
 
 const router = express.Router();
 
 router
   .route('/')
-  .get(eventController.getAllEvents)
+  .get(userController.protectRoute, eventController.getAllEvents)
   .post(eventController.createEvent);
 
 router
   .route('/:id')
+  .get(eventController.getEventById)
   .patch(eventController.updateEvent)
   .delete(eventController.deleteEvent);
 
