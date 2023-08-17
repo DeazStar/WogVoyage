@@ -74,18 +74,13 @@ const createToken = function () {
   return token;
 };
 
-userSchema.pre('save', async function (next) {
+userSchema.methods.hashPassword = async function () {
   this.password = await bcrypt.hash(this.password, 12);
   this.passwordConfirm = undefined;
+};
 
-  next();
-});
-
-userSchema.methods.checkPassword = async function (
-  inputPassword,
-  userPassword,
-) {
-  return await bcrypt.compare(inputPassword, userPassword);
+userSchema.methods.checkPassword = async function (inputPassword) {
+  return await bcrypt.compare(inputPassword, this.password);
 };
 
 userSchema.methods.generateEmailVerificationToken = function () {
@@ -104,6 +99,10 @@ userSchema.methods.generateEmailVerificationToken = function () {
 userSchema.methods.checkEmailTokenExpires = function () {
   console.log(this.emailVerificationTokenExpiresIn, new Date(Date.now()));
   return this.emailVerificationTokenExpiresIn > new Date(Date.now());
+};
+
+userSchema.methods.jwtTokenExpires = function (expiredTimeStamp) {
+  return expiredTimeStamp < Date.now();
 };
 
 const User = mongoose.model('User', userSchema);
