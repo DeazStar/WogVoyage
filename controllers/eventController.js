@@ -4,7 +4,9 @@ import Event from '../models/eventModel.js';
 import catchAsync from '../errors/catchAsync.js';
 
 const createEvent = catchAsync(async (req, res, next) => {
-  const event = await Event.create(req.body);
+  const requestBody = { ...req.body };
+  requestBody.organizer = req.user;
+  const event = await Event.create(requestBody);
 
   res.status(201).json({
     status: 'success',
