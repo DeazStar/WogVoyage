@@ -70,6 +70,12 @@ const userSchema = mongoose.Schema({
   passwordRecoveryTokenExpiresIn: Date,
 });
 
+userSchema.virtual('events', {
+  ref: 'Event',
+  foreignField: 'organizer',
+  localField: '_id',
+});
+
 const createToken = function () {
   const token = crypto.randomBytes(32).toString('hex');
 
