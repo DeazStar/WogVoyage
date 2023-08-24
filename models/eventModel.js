@@ -50,13 +50,23 @@ const eventSchema = new mongoose.Schema({
     },
   },
   organizer: {
-    type: mongoose.Schema.Types.ObjectId,
+    type: mongoose.Schema.ObjectId,
+    ref: 'User',
     required: [true, 'Event need an organizer'],
   },
   description: {
     type: String,
     required: [true, 'Event must have a description'],
   },
+});
+
+eventSchema.pre(/^find/, function (next) {
+  this.populate({
+    path: 'organizer',
+    select: 'firstName lastName',
+  });
+
+  next();
 });
 
 const Event = mongoose.model('Event', eventSchema);
