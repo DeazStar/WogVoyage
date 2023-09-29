@@ -6,7 +6,7 @@ import jwt from 'jsonwebtoken';
 import User from '../models/userModel.js';
 import AppError from '../errors/AppError.js';
 import catchAsync from '../errors/catchAsync.js';
-import sendEmail from '../lib/sendEmail.js';
+import Email from '../lib/Email.js';
 
 const signToken = (userId) =>
   jwt.sign({ userId }, process.env.JWT_SECRET, {
@@ -59,19 +59,11 @@ const signup = catchAsync(async (req, res, next) => {
 
   const token = user.generateEmailVerificationToken();
 
-  const message = `Verify your email address</h1> <p>to continue using WogVoyage 
-  please verify that this is your email 
-  address ${req.protocol}://${req.hostname}:${process.env.PORT}${req.baseUrl}/verifyEmail/${token}`;
+  const url = `${req.protocol}://${req.hostname}:${process.env.PORT}${req.baseUrl}/verifyEmail/${token}`;
 
-  const mailOptions = {
-    from: '<wogvoyage@gmail.com>',
-    to: user.email,
-    subject: 'WogVoyage - Verify your email',
-    text: message,
-  };
   user.save({ validateBeforeSave: false });
 
-  await sendEmail(mailOptions);
+  await new Email(user, url).sendEmailVerification();
 
   res.status(201).json({
     status: 'success',
@@ -164,20 +156,11 @@ const forgetPassword = catchAsync(async (req, res, next) => {
 
   const token = user.generatePasswordRecoveryToken();
 
-  const message = `Verify your email address</h1> <p>to continue using WogVoyage 
-  please verify that this is your email 
-  address ${req.protocol}://${req.hostname}:${process.env.PORT}${req.baseUrl}/recoverPassword/${token}`;
-
-  const mailOptions = {
-    from: '<wogvoyage@gmail.com>',
-    to: user.email,
-    subject: 'WogVoyage - Password recovery',
-    text: message,
-  };
+  const url = `${req.protocol}://${req.hostname}:${process.env.PORT}${req.baseUrl}/recoverPassword/${token}`;
 
   user.save({ validateBeforeSave: false });
 
-  sendEmail(mailOptions);
+  await new Email(user, url).sendPasswordRecoveryEmail();
 
   res.status(200).json({
     status: 'success',
