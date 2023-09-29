@@ -68,6 +68,7 @@ const userSchema = mongoose.Schema({
   },
   passwordRecoveryToken: String,
   passwordRecoveryTokenExpiresIn: Date,
+  profileImage: String,
 });
 
 userSchema.virtual('events', {
