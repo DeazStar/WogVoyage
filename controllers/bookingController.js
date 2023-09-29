@@ -12,8 +12,8 @@ const createBooking = catchAsync(async (req, res, next) => {
   }
 
   const booking = await Booking.create({
-    eventId: eventId,
-    userId: userId,
+    event: eventId,
+    user: userId,
   });
 
   res.status(201).json({
@@ -26,10 +26,10 @@ const createBooking = catchAsync(async (req, res, next) => {
 
 const getMyBooking = catchAsync(async (req, res, next) => {
   const query = Booking.find({
-    userId: req.user._id.toString(),
+    user: req.user._id.toString(),
   });
 
-  const bookings = await query.populate({ path: 'eventId' });
+  const bookings = await query.populate({ path: 'event' });
   res.status(200).json({
     status: 'success',
     data: {
