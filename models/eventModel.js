@@ -58,6 +58,10 @@ const eventSchema = new mongoose.Schema({
     type: String,
     required: [true, 'Event must have a description'],
   },
+  imageCover: {
+    type: String,
+    required: [true, 'Event must have an image cover'],
+  },
 });
 
 eventSchema.pre(/^find/, function (next) {
