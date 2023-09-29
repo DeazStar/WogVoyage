@@ -10,7 +10,15 @@ const router = express.Router();
 router
   .route('/')
   .get(userController.protectRoute, eventController.getAllEvents)
-  .post(userController.protectRoute, eventController.createEvent);
+  .post(
+    userController.protectRoute,
+    eventController.uploadCoverImage,
+    eventController.createEvent,
+  );
+
+router
+  .route('/myEvents')
+  .get(userController.protectRoute, eventController.getMyEvents);
 
 router
   .route('/:id')
