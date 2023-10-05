@@ -4,13 +4,13 @@
   "description": "## A Platform for posting events and buying event ticket online.",
   "main": "server.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "vitest --run --reporter=verbose",
     "start:dev": "NODE_ENV=development nodemon server.js",
     "start:prod": "NODE_ENV=production nodemon server.js"
   },
   "type": "module",
   "keywords": [],
-  "author": "",
+  "author": "Naod Ararsa",
   "license": "ISC",
   "dependencies": {
     "@babel/cli": "^7.22.10",
